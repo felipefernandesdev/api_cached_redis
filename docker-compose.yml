@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres
+    container_name: pg
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: cache
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+  app:
+    build: .
+    depends_on:
+      - redis
+      - db
+    links:
+      - redis
+    command: npm run dev
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/app
+      - /usr/app/node_modules
+    environment:
+      NODE_ENV: dev
+      PORT: 3000
+  redis:
+    image: bitnami/redis:latest
+    expose:
+      - 6379
+    environment:
+      REDIS_PASSWORD: root
